@@ -1,0 +1,5 @@
+GOOGLE_ID="28933489309-18svqqfbcjjeer2ouro73n4ko9p348a0.apps.googleusercontent.com"
+GOOGLE_SECRET="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"
+MONGODB_URI = "mongodb+srv://ecommerce:ecommerce123@cluster0.4dbpwed.mongodb.net/?retryWrites=true&w=majority"
+S3_ACCESS_KEY ="AKIAZHA7HGMSAYXEI6E3"
+S3_SECRET_ACCESS_KEY = "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"
