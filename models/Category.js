@@ -2,11 +2,7 @@ import mongoose, { model, Schema, models } from "mongoose";
 
 const CategorySchema = new Schema({
   name: { type: String, required: true },
-  parentCategory: {
-    name: { type: String },
-    _id: { type: mongoose.Types.ObjectId, required: false },
-    properties: [{ type: Object }],
-  },
+  parentCategory: { type: Array },
   properties: { type: [{ type: Object }] },
 });
 

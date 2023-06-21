@@ -13,7 +13,7 @@ const newProductSchema = Yup.object().shape({
   category: Yup.string().required("Required"),
 });
 
-export default function ProductForm({ item }) {
+export default function ProductForm({ item = {} }) {
   const router = useRouter();
   const [images, setImages] = useState(item?.images || []);
   const [categories, setCategories] = useState([]);
@@ -26,13 +26,15 @@ export default function ProductForm({ item }) {
     setCategories(cats.data);
   };
   useEffect(() => {
-    item?.images && setImages(item.images);
+    if (Object.keys(item).length == 0) {
+      setImages([]);
+    } else {
+      item?.images && setImages(item.images);
+    }
+    console.log(item);
   }, [item]);
   useEffect(() => {
     item && setPropertyValues(item?.properties || {});
-    item &&
-      categories.length > 0 &&
-      handleParentCategoryProperties(item?.category);
   }, [item, categories]);
 
   useEffect(() => {
@@ -66,21 +68,6 @@ export default function ProductForm({ item }) {
     }
   };
 
-  let handleParentCategoryProperties = (id) => {
-    if (!id) {
-      setProperties([]);
-      return;
-    }
-    let currentCat = categories.find((category) => category._id === id);
-    let mergedProperties = [...currentCat.properties]; // create new array to hold merged properties
-    while (currentCat?.parentCategory._id) {
-      mergedProperties.push(...currentCat.parentCategory.properties);
-      currentCat = categories.find(
-        (category) => category._id === currentCat.parentCategory._id
-      );
-    }
-    setProperties(mergedProperties);
-  };
   return (
     <Formik
       enableReinitialize
@@ -88,7 +75,8 @@ export default function ProductForm({ item }) {
         name: item?.name || "",
         desc: item?.desc || "",
         price: item?.price || 0,
-        category: item?.category || "",
+        category:
+          (item?.category && item?.category[item?.category?.length - 1]) || "",
       }}
       validationSchema={newProductSchema}
       onSubmit={(values) => {
@@ -164,9 +152,9 @@ export default function ProductForm({ item }) {
               as="select"
               name="category"
               onChange={(ev) => {
+                console.log(ev.target.value);
                 handleChange(ev);
                 setPropertyValues({});
-                handleParentCategoryProperties(ev.target.value);
               }}
             >
               <option value="" key="">

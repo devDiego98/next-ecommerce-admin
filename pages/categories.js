@@ -22,16 +22,15 @@ export default function Categories() {
   async function saveCategory(ev) {
     ev.preventDefault();
     const name = ev.target[0].value;
-    let parentCategory;
-    let parentCategoryProperties;
-
+    let parentCategory = categories.find(
+      (cat) => cat._id === ev.target[1].value
+    );
     if (ev.target[1].value === "") {
-      parentCategory = {};
+      parentCategory = [];
     } else {
-      parentCategory = {
-        name: parentCategoryField.current.selectedOptions[0].innerHTML,
-        _id: parentCategoryField.current.value,
-      };
+      parentCategory = [...parentCategory.parentCategory].concat(
+        parentCategory._id
+      );
     }
 
     await axios.post("/api/categories", {
@@ -46,27 +45,36 @@ export default function Categories() {
   let handleParentCategoryProperties = (id) => {
     if (!id) return;
     let currentCat = categories.find((category) => category._id === id);
-    let mergedProperties = [...currentCat.properties];
-    while (currentCat?.parentCategory._id) {
-      mergedProperties.push(...currentCat.parentCategory.properties);
-      currentCat = categories.find(
-        (category) => category._id === currentCat.parentCategory._id
+    let mergedProperties = [];
+
+    for (let x = 0; x < currentCat.parentCategory.length; x++) {
+      let parent = categories.find(
+        (category) => category._id === currentCat.parentCategory[x]
       );
+      mergedProperties.push(...parent.properties);
     }
+    setParentProperties(mergedProperties);
+    console.log(mergedProperties);
     return mergedProperties;
   };
 
   const setEditableCategory = async (values) => {
-    nameField.current.value = values.name;
-    if (values?.parentCategory?.name) {
-      parentCategoryField.current.value = values.parentCategory._id;
+    setCategoryEdit({ editting: true, id: values._id });
+    setFields(values);
+  };
+
+  const setFields = (values) => {
+    if (values?.parentCategory?.length) {
+      parentCategoryField.current.value =
+        values.parentCategory[values.parentCategory.length - 1];
     } else {
       parentCategoryField.current.value = "";
     }
-    let parentProps = handleParentCategoryProperties(values.parentCategory._id);
+
+    nameField.current.value = values.name;
+    let parentProps = handleParentCategoryProperties(values?._id);
     setParentProperties(parentProps || []);
     setProperties(values.properties);
-    setCategoryEdit({ editting: true, id: values._id });
   };
 
   function clearFields() {
@@ -239,14 +247,17 @@ export default function Categories() {
                 type="button"
                 className="btn-primary py-1"
                 onClick={async () => {
+                  let parent = categories.find(
+                    (category) =>
+                      category._id === parentCategoryField.current.value
+                  );
+                  let newParenteCateries = [...parent.parentCategory];
+                  newParenteCateries.push(parent._id);
+
                   let body = {
                     _id: categoryEdit.id,
                     name: nameField.current.value,
-                    parentCategoryField: {
-                      name: parentCategoryField.current.selectedOptions[0]
-                        .innerHTML,
-                      _id: parentCategoryField.current.value,
-                    },
+                    parentCategory: newParenteCateries,
                     properties: properties,
                   };
                   body.properties = properties.map((property) => ({
@@ -281,7 +292,6 @@ export default function Categories() {
           <thead>
             <tr>
               <th>Category Name</th>
-              <th>Parent Category Name</th>
               <th></th>
             </tr>
           </thead>
@@ -289,7 +299,6 @@ export default function Categories() {
             {categories?.map((category) => (
               <tr key={category._id}>
                 <td>{category?.name}</td>
-                <td>{category?.parentCategory?.name}</td>
                 <td className="actions">
                   <button
                     onClick={() => {
