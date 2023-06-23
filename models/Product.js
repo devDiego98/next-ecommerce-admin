@@ -4,6 +4,7 @@ const ProductSchema = new Schema({
   name: { type: String, required: true },
   desc: String,
   price: { type: Number, required: true },
+  stripe_price_id: { type: String, required: true },
   images: { type: Array, required: true },
   category: { type: Array },
   properties: { type: Object },

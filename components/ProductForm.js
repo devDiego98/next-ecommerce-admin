@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import { useRouter } from "next/router";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
 
@@ -14,7 +13,6 @@ const newProductSchema = Yup.object().shape({
 });
 
 export default function ProductForm({ item = {} }) {
-  const router = useRouter();
   const [images, setImages] = useState(item?.images || []);
   const [categories, setCategories] = useState([]);
   const [isUploading, setisUploading] = useState(false);
