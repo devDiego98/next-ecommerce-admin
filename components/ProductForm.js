@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
+import { useRouter } from "next/router";
 
 const newProductSchema = Yup.object().shape({
   name: Yup.string().required("Required"),
@@ -13,6 +14,7 @@ const newProductSchema = Yup.object().shape({
 });
 
 export default function ProductForm({ item = {} }) {
+  const router = useRouter();
   const [images, setImages] = useState(item?.images || []);
   const [categories, setCategories] = useState([]);
   const [isUploading, setisUploading] = useState(false);
@@ -24,10 +26,12 @@ export default function ProductForm({ item = {} }) {
     setCategories(cats.data);
   };
   useEffect(() => {
-    if (Object.keys(item).length == 0) {
-      setImages([]);
-    } else {
-      item?.images && setImages(item.images);
+    if (item) {
+      if (Object.keys(item).length == 0) {
+        setImages([]);
+      } else {
+        item?.images && setImages(item.images);
+      }
     }
     console.log(item);
   }, [item]);
@@ -40,12 +44,18 @@ export default function ProductForm({ item = {} }) {
   }, []);
 
   const saveProduct = async (data) => {
+    let selectedCat = categories.find((cat) => cat._id == data.category);
+    let fullCat = selectedCat.parentCategory.concat(selectedCat._id);
     data.images = images;
     data.properties = { ...propertyValues };
     if (item?._id) {
-      await axios.put("/api/products", data);
+      await axios.put("/api/products", {
+        ...data,
+        category: fullCat,
+        _id: router.query.id[0],
+      });
     } else {
-      await axios.post("/api/products", data);
+      await axios.post("/api/products", { ...data, category: fullCat });
     }
     // router.push("/products");
   };

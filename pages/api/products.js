@@ -41,14 +41,17 @@ export default async function handler(req, res) {
   if (method === "PUT") {
     const { name, desc, price, _id, images, category, properties } = req.body;
     res.status(200).json(
-      await Product.updateOne(_id, {
-        name,
-        desc,
-        price,
-        images,
-        category,
-        properties,
-      })
+      await Product.updateOne(
+        { _id: _id },
+        {
+          name,
+          desc,
+          price,
+          images,
+          category,
+          properties,
+        }
+      )
     );
   }
 
